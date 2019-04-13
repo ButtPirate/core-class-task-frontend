@@ -16,7 +16,11 @@ class App extends Component {
         idField: null,
         nameField: null
       },
+      order: 'id_asc',
       loading: false,
+      pages: 1,
+      pageSize: 3,
+      page: 0
     }
   }
 
@@ -34,7 +38,6 @@ class App extends Component {
   ];
 
 
-
   //--- draw
 
   drawTable = () => {
@@ -45,6 +48,13 @@ class App extends Component {
           columns={this.columns}
           className='table-wrapper'
           loading={this.state.loading}
+          defaultPageSize={3}
+          pageSizeOptions={[3,5,10]}
+          multiSort={false}
+          pages={this.state.pages}
+          manual
+          onFetchData={(state, instance)=>{ if (this.state.tableData.length) { this.tableChange(state);} }
+          }
         />
       </div>
     )
@@ -76,21 +86,48 @@ class App extends Component {
             </FormGroup>
           </Col>
           <Col className='top-bar-button-column'>
-            <Button color='secondary' block onClick={this.search}>Search</Button>
+            <Button color='secondary' block onClick={() => {this.search(true)}}>Search</Button>
           </Col>
         </Row>
       </Container>
     );
   };
 
+  tableChange = (tableState) => {
+    let orderCode = this.state.order;
+
+    if (tableState.sorted.length) {
+      orderCode = tableState.sorted[0].id;
+      if (tableState.sorted[0].desc) {
+        orderCode += '_desc';
+      } else {
+        orderCode += '_asc';
+      }
+
+    }
+
+    if (this.state.pageSize === tableState.pageSize) {
+      this.setState({pageSize: tableState.pageSize, page: tableState.page, order: orderCode}, ()=>{this.search(false)});
+    } else {
+      this.setState({pageSize: tableState.pageSize, page: tableState.page, order: orderCode}, ()=>{this.search(true)});
+    }
+
+
+    };
+
+
   //--- state
 
-  search = async () => {
+  search = async (withTotal) => {
     this.setState({loading:true});
 
-    let pageData = await this.fetchData();
+    let response = await this.fetchData(withTotal);
 
-    this.setState({tableData: pageData, loading: false});
+    this.setState({tableData: response.result, loading: false});
+
+    if (withTotal) {
+      this.setState({pages: response.pages});
+    }
   };
 
   setFieldValue = (fieldName, newValue) => {
@@ -100,14 +137,17 @@ class App extends Component {
   };
 
 
-
   //--- fetch
 
-  fetchData = async() => {
+  fetchData = async(withTotal) => {
     let fetchedData = await axios.get('api/table', {
       params:{
         id: this.state.fields.idField ? this.state.fields.idField : null,
         name: this.state.fields.nameField ? this.state.fields.nameField : null,
+        order: this.state.order,
+        pageSize: this.state.pageSize,
+        page: this.state.page,
+        withTotal
       }
     });
 
