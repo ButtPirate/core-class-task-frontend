@@ -1,3 +1,7 @@
+Frontend-приложение для тестового задания в компанию Core Class.
+
+Запуск: yarn install && yarn start
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
