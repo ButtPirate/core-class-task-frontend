@@ -15,8 +15,12 @@ class ExampleUploader extends Component {
   }
 
   componentDidMount() {
-    axios.get('api/files').then((res) => {this.setState({files:res.data})});
+    this.refreshFileList();
   }
+
+  refreshFileList = () => {
+    axios.get('api/files').then((res) => {this.setState({files:res.data})});
+  };
 
   onFormSubmit = (e) => {
     e.preventDefault();
@@ -32,7 +36,9 @@ class ExampleUploader extends Component {
         'content-type': 'multipart/form-data'
       }
     };
-    return  axios.post(url, formData,config)
+    axios.post(url, formData,config).then(()=>{
+      this.refreshFileList();
+    });
   };
 
 
@@ -50,6 +56,15 @@ class ExampleUploader extends Component {
     );
   };
 
+  drawList = () => {
+    return (
+      <ul>
+        {this.state.files ? this.state.files.map(file=>{return <li>{file}</li>}) : ''}
+      </ul>
+    )
+
+  };
+
   render () {
 
 
@@ -57,7 +72,7 @@ class ExampleUploader extends Component {
       <div>
         {this.drawUploadButton()}
         <div>
-          {this.state.files}
+          {this.drawList()}
         </div>
       </div>
     )
