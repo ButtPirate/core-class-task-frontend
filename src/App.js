@@ -6,13 +6,28 @@ import ExampleTable from './ExampleTable';
 import ExampleUploader from './ExampleUploader';
 
 class App extends Component {
-  // switch = 'table';
-  switch = 'uploader';
+  constructor() {
+    super();
+    this.state = {
+      mode: 'choice'
+    }
+  }
 
   render () {
-    if (this.switch === 'table') {
+    if (this.state.mode ==='choice') {
+      return (
+        <div>
+          <button onClick={()=>{this.setState({mode:'table'})}}>Задание 1 - просмотр таблицы</button>
+          <button onClick={()=>{this.setState({mode:'uploader'})}}>Задание 2 - загрузка файлов</button>
+        </div>
+      )
+    }
+
+    if (this.state.mode=== 'table') {
       return <ExampleTable />
-    } else {
+    }
+
+    if (this.state.mode=== 'uploader') {
       return <ExampleUploader/>
     }
   }
