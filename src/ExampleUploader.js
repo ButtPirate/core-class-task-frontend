@@ -6,12 +6,15 @@ class ExampleUploader extends Component {
     super();
     this.state = {
       files: null,
-      file: null
+      file: null,
+      checkbox: true
     };
+
 
     this.onFormSubmit = this.onFormSubmit.bind(this);
     this.onChange = this.onChange.bind(this);
     this.fileUpload = this.fileUpload.bind(this);
+    this.fileProcessing = this.fileProcessing.bind(this);
   }
 
   componentDidMount() {
@@ -24,11 +27,25 @@ class ExampleUploader extends Component {
 
   onFormSubmit = (e) => {
     e.preventDefault();
-    this.fileUpload(this.state.file);
+    this.fileProcessing(this.state.file);
   };
 
   fileUpload = (file) => {
     const url = 'api/file';
+    const formData = new FormData();
+    formData.append('file',file);
+    const config = {
+      headers: {
+        'content-type': 'multipart/form-data'
+      }
+    };
+    axios.post(url, formData,config).then(()=>{
+      this.refreshFileList();
+    });
+  };
+
+  fileProcessing = (file) => {
+    const url = 'api/process';
     const formData = new FormData();
     formData.append('file',file);
     const config = {
